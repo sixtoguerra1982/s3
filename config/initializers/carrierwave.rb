@@ -1,15 +1,20 @@
+require 'carrierwave/storage/abstract'
+require 'carrierwave/storage/file'
+require 'carrierwave/storage/fog'
 CarrierWave.configure do |config|
-  if Rails.env.development? || Rails.env.test?
-    config.storage = :file
-  else
+    # Credenciales de aws-s3
+    if Rails.env.development? || Rails.env.test?
+     config.storage    = :file
+    else
+     config.storage    = :fog
+    end
     config.fog_provider = 'fog/aws'           # required
     config.fog_credentials = {
       provider: 'AWS',                        # required
-      aws_access_key_id: ENV['S3_ACCESS_KEY'],# required unless using use_iam_profile
-      aws_secret_access_key: ENV['S3_SECRET_KEY']# required unless using use_iam_profile
+      region: ENV.fetch('AWS_REGION'),
+      aws_access_key_id: ENV.fetch('AWS_ACCESS_KEY_ID'),# required unless using use_iam_profile
+      aws_secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY')# required unless using use_iam_profile
     }
-    config.fog_directory  = ENV['S3_BUCKET']     # required
+    config.fog_directory  = ENV.fetch('S3_BUCKET_NAME')# required
     config.fog_public     = false                # optional, defaults to true
-    config.storage = :fog
-  end
 end
